@@ -63,21 +63,14 @@ async function searchWithAuth(query: string, user: string, pass: string): Promis
   if (loginText.includes('Login invalid') || loginText.includes('Login ungültig')) {
     throw new Error('USDB login falhou — verifique USDB_USER/PASS na Vercel');
   }
-  // search — must be POST to index.php?link=list with wd, order, limit
-  const params = new URLSearchParams({
-    order: 'views',
-    ud: 'desc',
-    limit: '20',
-    wd: query,
-  });
-  const searchRes = await fetch(`${USDB_BASE}/index.php?link=list`, {
-    method: 'POST',
+  // search — USDB list expects GET with wd (word) + order/limit as query params
+  const searchUrl = `${USDB_BASE}/index.php?link=list&wd=${encodeURIComponent(query)}&limit=20&order=views&ud=desc`;
+  const searchRes = await fetch(searchUrl, {
+    method: 'GET',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
       'User-Agent': 'CantaMiau/1.0',
       Cookie: cookies,
     },
-    body: params.toString(),
   });
   const html = await searchRes.text();
   if (html.includes('You are not logged in') || html.includes('Du bist nicht eingeloggt')) {
@@ -95,21 +88,19 @@ async function searchHehoe(query: string): Promise<string> {
 
 function parseSongs(html: string) {
   const songs: { id: string; artist: string; title: string }[] = [];
-  const rowRegex = /<tr[^>]*data-songid\s*=\s*["']?(?<id>\d+)["']?[^>]*>([\s\S]*?)<\/tr>/gi;
+  const rowRegex = /<tr[^>]*data-songid\s*=\s*["']?(?<id>\d+)["']?[^>]*>(?<content>[\s\S]*?)<\/tr>/gi;
   let rowMatch: RegExpExecArray | null;
   while ((rowMatch = rowRegex.exec(html)) && songs.length < 30) {
     const id = rowMatch.groups?.id || '';
-    const rowHtml = rowMatch[1] || rowMatch[0];
-    // Strategy 1: <td>artist</td> followed by <td><a>title</a>
+    const rowHtml = (rowMatch.groups as any)?.content || rowMatch[2] || '';
     let artist = '';
     let title = '';
-    const atRegex = /<td[^>]*>\s*([^<]+?)\s*<\/td>\s*<td[^>]*>\s*<a[^>]*>\s*([^<]+?)\s*<\/a>/i;
+    const atRegex = /<td[^>]*>\s*([^<]+?)\s*<\/td>\s*<td[^>]*>\s*<a[^>]*>\s*([^<]+?)\s*(?:<\/a>)?\s*<\/td>/i;
     const at = rowHtml.match(atRegex);
     if (at) {
       artist = stripHtml(at[1] || '');
       title = stripHtml(at[2] || '');
     } else {
-      // Strategy 2: split <td> cells
       const cells: string[] = [];
       const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
       let tdMatch: RegExpExecArray | null;
@@ -122,12 +113,22 @@ function parseSongs(html: string) {
         const aMatch = titleCell.match(/<a[^>]*>([\s\S]*?)<\/a>/i);
         title = stripHtml((aMatch ? aMatch[1] : titleCell) || '');
       } else if (cells.length >= 2) {
-        // fallback: last two cells
         artist = stripHtml(cells[cells.length - 2] || '');
         const last = cells[cells.length - 1] || '';
         const aMatch = last.match(/<a[^>]*>([\s\S]*?)<\/a>/i);
         title = stripHtml((aMatch ? aMatch[1] : last) || '');
+      } else if (cells.length === 2) {
+        artist = stripHtml(cells[0] || '');
+        const aMatch = cells[1].match(/<a[^>]*>([\s\S]*?)<\/a>/i);
+        title = stripHtml((aMatch ? aMatch[1] : cells[1]) || '');
       }
+    }
+    // Fallback: if still empty, try direct extract of first <td> and <a>
+    if (!artist || !title) {
+      const singleArtist = rowHtml.match(/<td[^>]*>\s*([^<]+?)\s*<\/td>/i);
+      const singleTitle = rowHtml.match(/<a[^>]*>\s*([^<]+?)\s*<\/a>/i);
+      if (singleArtist) artist = stripHtml(singleArtist[1]);
+      if (singleTitle) title = stripHtml(singleTitle[1]);
     }
     if (id && artist && title) songs.push({ id, artist: artist.trim(), title: title.trim() });
   }
