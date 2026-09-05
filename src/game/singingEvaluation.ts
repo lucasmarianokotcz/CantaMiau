@@ -1,11 +1,10 @@
 import { judge, pitchDifference, type Feedback } from './scoring';
 
-// Audio-time constants: absorb brief voice fluctuations without moving the lyrics.
-// Antes: 0.20 / 0.18 / 0.35 — ainda trocava ~2x por segundo com vibrato/ruído.
-// 0.40 / 0.32 / 0.70 ficou bom; leve aumento só no hold/confirm pra "ERROU" piscar menos.
-const PITCH_SMOOTHING_SECONDS = 0.4;
-const FEEDBACK_CONFIRM_SECONDS = 0.36;
-const FEEDBACK_MIN_HOLD_SECONDS = 0.8;
+// Avaliação menos sensível: janela de afinação mais larga e feedback mais estável.
+// Antes 0.40/0.36/0.80 — usuário ainda achou avaliação piscando/rígida.
+const PITCH_SMOOTHING_SECONDS = 0.48;
+const FEEDBACK_CONFIRM_SECONDS = 0.42;
+const FEEDBACK_MIN_HOLD_SECONDS = 0.9;
 
 export function createSingingEvaluation() {
   let noteKey: string | null = null;

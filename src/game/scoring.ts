@@ -14,9 +14,9 @@ export function pitchDifference(expectedMidi: number, detectedMidi: number) {
   return Math.abs(((detectedMidi - expectedMidi + 6) % 12 + 12) % 12 - 6);
 }
 export function judge(difference: number): Feedback {
-  return difference < 0.42 ? 'PERFECT' : difference < 0.85 ? 'GREAT' : difference < 1.65 ? 'GOOD' : 'MISS';
+  return difference < 0.5 ? 'PERFECT' : difference < 0.9 ? 'GREAT' : difference < 1.8 ? 'GOOD' : 'MISS';
 }
-export const accuracy = { PERFECT: 1, GREAT: 0.75, GOOD: 0.4, MISS: 0 };
+export const accuracy = { PERFECT: 1, GREAT: 0.75, GOOD: 0.5, MISS: 0 };
 const owners = (singer: Singer): ('player1' | 'player2')[] =>
   singer === 'both' ? ['player1', 'player2'] : [singer];
 export function addPoints(scores: GameScores, singer: Singer, feedback: Feedback, seconds: number, golden: boolean) {

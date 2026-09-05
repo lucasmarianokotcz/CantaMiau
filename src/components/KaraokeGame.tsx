@@ -62,7 +62,7 @@ export function KaraokeGame({
   const [debug, setDebug] = useState(
     new URLSearchParams(location.search).get("debug") === "true",
   );
-  const [threshold, setThreshold] = useState(() => savedMicValue("cantamiau.mic.threshold", 0.012, 0.001, 0.08));
+  const [threshold, setThreshold] = useState(() => savedMicValue("cantamiau.mic.threshold", 0.022, 0.001, 0.08));
   const [gain, setGain] = useState(() => savedMicValue("cantamiau.mic.gain", 1, 1, 20));
   const gainRef = useRef(gain);
   gainRef.current = gain;
@@ -421,10 +421,10 @@ export function KaraokeGame({
         <summary>Ajustar microfone · ganho {gain}x</summary>
         <div className="mic-settings-body">
           <div className="mic-presets">
-            <button className="secondary compact" onClick={() => { setGain(4); setThreshold(0.006); }}>
+            <button className="secondary compact" onClick={() => { setGain(3); setThreshold(0.012); }}>
               Meu microfone é baixo
             </button>
-            <button className="secondary compact" onClick={() => { setGain(1); setThreshold(0.012); }}>
+            <button className="secondary compact" onClick={() => { setGain(1); setThreshold(0.022); }}>
               Restaurar padrão
             </button>
             <button className="secondary compact" disabled={status === "loading" || !!micRef.current}

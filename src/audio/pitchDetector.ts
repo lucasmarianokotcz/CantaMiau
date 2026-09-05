@@ -16,15 +16,15 @@ export function createPitchReader(analyser: AnalyserNode, sampleRate: number) {
       buffer.reduce((sum, n) => sum + n * n, 0) / buffer.length,
     );
     const [hz, clarity] = detector.findPitch(buffer, sampleRate);
-    const valid = rms >= threshold && clarity >= 0.9 && hz >= 65 && hz <= 1400;
+    const valid = rms >= threshold && clarity >= 0.92 && hz >= 65 && hz <= 1400;
     const midi = valid ? 69 + 12 * Math.log2(hz / 440) : null;
-    if (midi !== null && previous !== null && Math.abs(midi - previous) < 0.8)
+    if (midi !== null && previous !== null && Math.abs(midi - previous) < 0.6)
       stable++;
     else stable = 0;
     previous = midi;
     return {
       hz: valid ? hz : null,
-      midi: stable >= 2 ? midi : null,
+      midi: stable >= 3 ? midi : null,
       rms,
       clarity,
     };
