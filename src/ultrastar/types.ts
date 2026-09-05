@@ -20,6 +20,9 @@ export interface Song {
   bpm: number;
   gap: number;
   audioFile: string;
+  coverFile?: string;
+  backgroundFile?: string;
+  videoFile?: string;
   phrases: KaraokePhrase[];
 }
 export interface SongConfig {
@@ -31,5 +34,6 @@ export interface LoadedSong extends Song {
   id: string;
   audioUrl: string;
   coverUrl: string;
+  backgroundUrl?: string;
   config?: SongConfig;
 }

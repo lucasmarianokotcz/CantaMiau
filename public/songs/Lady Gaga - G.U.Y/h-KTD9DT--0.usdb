@@ -1,0 +1,44 @@
+{
+    "song_id": 16967,
+    "usdb_mtime": 1395463790,
+    "meta_tags": "v=ohs0a-QnFF4,co=guy-65e80ea3f05f0.jpg,bg=lady-gaga-4ddec6482ae79.jpg",
+    "pinned": false,
+    "txt": {
+        "fname": "Lady Gaga - G.U.Y.txt",
+        "mtime": 1788647390969601,
+        "resource": "https://usdb.animux.de/?link=gettxt&id=16967",
+        "status": "success"
+    },
+    "audio": {
+        "fname": "Lady Gaga - G.U.Y.m4a",
+        "mtime": 1788647390978101,
+        "resource": "ohs0a-QnFF4",
+        "status": "success"
+    },
+    "vocals": {
+        "status": "skipped_disabled"
+    },
+    "instrumental": {
+        "status": "skipped_disabled"
+    },
+    "video": {
+        "fname": "Lady Gaga - G.U.Y.mp4",
+        "mtime": 1788647388170416,
+        "resource": "ohs0a-QnFF4",
+        "status": "success"
+    },
+    "cover": {
+        "fname": "Lady Gaga - G.U.Y [CO].jpg",
+        "mtime": 1788647389684535,
+        "resource": "https://assets.fanart.tv/fanart/guy-65e80ea3f05f0.jpg",
+        "status": "success"
+    },
+    "background": {
+        "fname": "Lady Gaga - G.U.Y [BG].jpg",
+        "mtime": 1788647390954099,
+        "resource": "https://assets.fanart.tv/fanart/lady-gaga-4ddec6482ae79.jpg",
+        "status": "success"
+    },
+    "custom_data": {},
+    "version": 1
+}

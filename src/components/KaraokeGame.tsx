@@ -17,7 +17,7 @@ import {
   type Feedback,
   type GameScores,
 } from "../game/scoring";
-import { formatScore, formatTime, singerName } from "../game/display";
+import { feedbackLabel, formatScore, formatTime, singerName } from "../game/display";
 import { createSingingEvaluation } from "../game/singingEvaluation";
 import { LyricsDisplay } from "./LyricsDisplay";
 import { NoteHighway } from "./NoteHighway";
@@ -51,6 +51,7 @@ export function KaraokeGame({
   const [view, setView] = useState({
     time: 0,
     pitch: silent,
+    visualMidi: null as number | null,
     feedback: "MISS" as Feedback,
     delta: 0,
   });
@@ -91,6 +92,13 @@ export function KaraokeGame({
     const audio = audioRef.current!;
     const evaluation = createSingingEvaluation();
     let lastFeedback: Feedback = "MISS";
+    // Suavização leve só pro ponto não tremer — bem mais rápido que 0.14s
+    let visualMidi: number | null = null;
+    let noVoiceHold = 0;
+    let lastFrameMs = performance.now();
+    const VISUAL_SMOOTHING_SECONDS = 0.06;
+    const VISUAL_DEADBAND_SEMITONES = 0.05;
+    const VISUAL_HIDE_DELAY_SECONDS = 0.08;
     const notes = song.phrases.flatMap((p) =>
       p.notes.map((n, i) => ({
         n,
@@ -127,6 +135,9 @@ export function KaraokeGame({
     };
     const loop = () => {
       if (!mounted.current || finished.current) return;
+      const nowMs = performance.now();
+      const frameDt = Math.min(0.05, Math.max(0, (nowMs - lastFrameMs) / 1000));
+      lastFrameMs = nowMs;
       const time = audio.currentTime;
       const pitch = micRef.current?.read(thresholdRef.current, gainRef.current) ?? silent;
       let feedback: Feedback = lastFeedback,
@@ -169,7 +180,28 @@ export function KaraokeGame({
       lastFeedback = feedback;
       if (!audio.paused || audio.ended) settle(time);
       lastTime.current = time;
-      setView({ time, pitch, feedback, delta });
+      // --- visual dot smoothing (does not affect scoring) ---
+      const rawMidi = pitch.midi;
+      if (rawMidi !== null) {
+        noVoiceHold = 0;
+        if (visualMidi === null) {
+          visualMidi = rawMidi;
+        } else {
+          const diff = rawMidi - visualMidi;
+          // Large jumps (>5 semitones) are usually octave errors — snap.
+          if (Math.abs(diff) > 5) {
+            visualMidi = rawMidi;
+          } else if (Math.abs(diff) > VISUAL_DEADBAND_SEMITONES) {
+            const dt = frameDt > 0 ? frameDt : 0.016;
+            const alpha = 1 - Math.exp(-dt / VISUAL_SMOOTHING_SECONDS);
+            visualMidi = visualMidi + alpha * diff;
+          }
+        }
+      } else {
+        noVoiceHold += frameDt > 0 ? frameDt : 0.016;
+        if (noVoiceHold > VISUAL_HIDE_DELAY_SECONDS) visualMidi = null;
+      }
+      setView({ time, pitch, visualMidi, feedback, delta });
       frame = requestAnimationFrame(loop);
     };
     audio.addEventListener("ended", end);
@@ -333,21 +365,14 @@ export function KaraokeGame({
       <section className="stage">
         <div className="singer-row">
           <div>
-            <span className="eyebrow">
-              {beat < phrase.startBeat
-                ? "PREPARE A VOZ"
-                : singer === "both"
-                  ? "CANTEM JUNTOS"
-                  : "AGORA É SUA VEZ"}
-            </span>
             <h1>{singerName(singer, players)}</h1>
           </div>
           <div className={"feedback " + view.feedback}>
-            {expected && status === "playing" ? view.feedback : "♪"}
+            {expected && status === "playing" ? feedbackLabel[view.feedback] : "♪"}
             <small>COMBO x{combo}</small>
           </div>
         </div>
-        <NoteHighway phrase={phrase} beat={beat} midi={view.pitch.midi} />
+        <NoteHighway phrase={phrase} beat={beat} midi={view.visualMidi} />
         <LyricsDisplay
           phrase={phrase}
           next={next}

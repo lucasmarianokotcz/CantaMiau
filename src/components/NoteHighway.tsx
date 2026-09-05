@@ -63,7 +63,7 @@ export function NoteHighway({
           <circle
             cx={Math.max(0, Math.min(100, x(beat))) * 10}
             cy={Math.max(8, Math.min(220, y(folded) * 2.3))}
-            r="9"
+            r="10"
             className="voice-dot"
           />
         )}

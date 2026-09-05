@@ -1,0 +1,41 @@
+{
+    "song_id": 5003,
+    "usdb_mtime": 1775504108,
+    "meta_tags": "v=kXYiU_JCYtU,co=numb-5b6776be4f911.jpg,bg=linkin-park-4de523586c57e.jpg",
+    "pinned": false,
+    "txt": {
+        "fname": "Linkin Park - Numb.txt",
+        "mtime": 1788648192541593,
+        "resource": "https://usdb.animux.de/?link=gettxt&id=5003",
+        "status": "success"
+    },
+    "audio": {
+        "fname": "Linkin Park - Numb.m4a",
+        "mtime": 1788648192549599,
+        "resource": "kXYiU_JCYtU",
+        "status": "success"
+    },
+    "vocals": {
+        "status": "skipped_disabled"
+    },
+    "instrumental": {
+        "status": "skipped_disabled"
+    },
+    "video": {
+        "status": "skipped_disabled"
+    },
+    "cover": {
+        "fname": "Linkin Park - Numb [CO].jpg",
+        "mtime": 1788648191317400,
+        "resource": "https://assets.fanart.tv/fanart/numb-5b6776be4f911.jpg",
+        "status": "success"
+    },
+    "background": {
+        "fname": "Linkin Park - Numb [BG].jpg",
+        "mtime": 1788648192526091,
+        "resource": "https://assets.fanart.tv/fanart/linkin-park-4de523586c57e.jpg",
+        "status": "success"
+    },
+    "custom_data": {},
+    "version": 1
+}

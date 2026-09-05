@@ -33,8 +33,14 @@ export async function loadCatalog(): Promise<{ songs: LoadedSong[]; errors: stri
       config = validateConfig(await configRes.json());
     else if (!configRes.ok && configRes.status !== 404)
       throw new Error(entry.folder + ': erro ao carregar configuração.');
+    const encode = (file: string) => file.split('/').map(encodeURIComponent).join('/');
+    // #COVER / #BACKGROUND têm prioridade; fallback para cover.jpg / [CO]/[BG] antigos
+    const coverFile = song.coverFile?.trim();
+    const backgroundFile = song.backgroundFile?.trim();
+    const coverUrl = coverFile ? base + encode(coverFile) : base + 'cover.jpg';
+    const backgroundUrl = backgroundFile ? base + encode(backgroundFile) : undefined;
     return { ...song, id: entry.folder + '/' + (entry.songFile || 'song.txt'), config, phrases: applyConfig(song.phrases, config),
-      audioUrl: base + song.audioFile.split('/').map(encodeURIComponent).join('/'), coverUrl: base + 'cover.jpg' };
+      audioUrl: base + encode(song.audioFile), coverUrl, backgroundUrl };
   }));
   return {
     songs: results.flatMap(r => r.status === 'fulfilled' ? [r.value] : []),

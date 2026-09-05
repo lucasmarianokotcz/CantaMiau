@@ -39,5 +39,9 @@ export function parseUltraStar(text: string): Song {
   if (headers.RELATIVE?.toUpperCase() === 'YES') throw new Error('Use um arquivo UltraStar com tempos absolutos (#RELATIVE:NO).');
   if (!headers.MP3 || !phrases.length) throw new Error('A música precisa de #MP3 e notas válidas.');
   return { title: headers.TITLE || 'Sem título', artist: headers.ARTIST || 'Artista desconhecido',
-    bpm, gap, audioFile: headers.MP3, phrases: assignSingersToPhrases(phrases) };
+    bpm, gap, audioFile: headers.MP3,
+    coverFile: headers.COVER || undefined,
+    backgroundFile: headers.BACKGROUND || undefined,
+    videoFile: headers.VIDEO || undefined,
+    phrases: assignSingersToPhrases(phrases) };
 }

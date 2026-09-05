@@ -1,0 +1,41 @@
+{
+    "song_id": 3312,
+    "usdb_mtime": 1770220746,
+    "meta_tags": "v=3eT464L1YRA,co=https://media.hitparade.ch/cover/big/bryan_adams-heaven_s_1.jpg,bg=adams-bryan-5078889a0af96.jpg",
+    "pinned": false,
+    "txt": {
+        "fname": "Bryan Adams - Heaven.txt",
+        "mtime": 1788649112044257,
+        "resource": "https://usdb.animux.de/?link=gettxt&id=3312",
+        "status": "success"
+    },
+    "audio": {
+        "fname": "Bryan Adams - Heaven.m4a",
+        "mtime": 1788649112052256,
+        "resource": "3eT464L1YRA",
+        "status": "success"
+    },
+    "vocals": {
+        "status": "skipped_disabled"
+    },
+    "instrumental": {
+        "status": "skipped_disabled"
+    },
+    "video": {
+        "status": "skipped_disabled"
+    },
+    "cover": {
+        "fname": "Bryan Adams - Heaven [CO].jpg",
+        "mtime": 1788649110609482,
+        "resource": "https://usdb.animux.de/data/cover/3312.jpg",
+        "status": "fallback"
+    },
+    "background": {
+        "fname": "Bryan Adams - Heaven [BG].jpg",
+        "mtime": 1788649112030755,
+        "resource": "https://assets.fanart.tv/fanart/adams-bryan-5078889a0af96.jpg",
+        "status": "success"
+    },
+    "custom_data": {},
+    "version": 1
+}

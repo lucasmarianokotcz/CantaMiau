@@ -41,6 +41,8 @@ export default function App() {
   selectedRef.current = selected;
   const catalogRequest = useRef(0);
   const [catalogMessage, setCatalogMessage] = useState("");
+  const [previewBgFailed, setPreviewBgFailed] = useState(false);
+  useEffect(() => setPreviewBgFailed(false), [selected?.backgroundUrl, selected?.id]);
   const [players, setPlayers] = useState<Players>({
     player1: "Lucas",
     player2: "Amanda",
@@ -214,7 +216,19 @@ export default function App() {
           {selected ? (
             <>
               <div className="selected-preview">
-                <Cover song={selected} large />
+                {selected.backgroundUrl && !previewBgFailed ? (
+                  <>
+                    <img
+                      className="preview-bg"
+                      src={selected.backgroundUrl}
+                      alt=""
+                      onError={() => setPreviewBgFailed(true)}
+                    />
+                    <div className="preview-bg-overlay" />
+                  </>
+                ) : (
+                  <Cover song={selected} large />
+                )}
                 <span className="preview-tag">PRÓXIMA NO PALCO</span>
                 <div className="preview-text">
                   <h2>{selected.title}</h2>

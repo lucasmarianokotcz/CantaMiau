@@ -104,6 +104,6 @@ Referências técnicas: [formato UltraStar](https://www.ultrastar.de/guide_file_
 
 ## Suavização da avaliação da voz
 
-A diferença de afinação é suavizada por uma média exponencial com constante de 200 ms, apenas enquanto há voz válida na mesma nota. Isso reduz a influência de oscilações rápidas na pontuação. Ao mudar a nota esperada, a média é reiniciada.
+A diferença de afinação é suavizada por uma média exponencial com constante de 400 ms, apenas enquanto há voz válida na mesma nota. Isso reduz a influência de oscilações rápidas na pontuação. Ao mudar a nota esperada, a média é reiniciada.
 
-O feedback visual exige que uma nova classificação se mantenha por 180 ms e mantém cada rótulo por pelo menos 350 ms durante uma sequência contínua do mesmo cantor. Pausas, intervalos e mudanças de cantor reiniciam a avaliação. Silêncio e pitch sem confiança continuam valendo zero pontos, mesmo enquanto um rótulo anterior ainda aparece brevemente. Letras, cursor e notas continuam usando o tempo original do áudio.
+O feedback visual exige que uma nova classificação se mantenha por 320 ms e mantém cada rótulo por pelo menos 700 ms durante uma sequência contínua do mesmo cantor. Pausas, intervalos e mudanças de cantor reiniciam a avaliação. Silêncio e pitch sem confiança continuam valendo zero pontos, mesmo enquanto um rótulo anterior ainda aparece brevemente. Letras, cursor e notas continuam usando o tempo original do áudio.
