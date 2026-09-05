@@ -21,11 +21,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const html = await searchWithAuth(q, user, pass);
     const songs = parseSongs(html).slice(0, 20);
     if (!songs.length) {
-      const snippet = html.slice(0, 3000);
-      console.log('USDB search empty, html length', html.length, 'snippet', snippet);
+      const idx = html.indexOf('data-songid');
+      const snippet = idx >= 0 ? html.slice(Math.max(0, idx - 500), idx + 2000) : html.slice(0, 3000);
+      console.log('USDB search empty, html length', html.length, 'snippet', snippet.slice(0, 2000));
       const hasId = html.includes('data-songid');
       const rowCount = (html.match(/data-songid/g) || []).length;
-      return res.json({ songs, debug: hasId ? `parse falhou rowCount=${rowCount}` : 'nenhum data-songid no HTML', snippet: snippet.slice(0, 800) });
+      // also try to extract first row cells for debug
+      const firstRow = html.match(/<tr[^>]*data-songid[^>]*>[\s\S]*?<\/tr>/i);
+      const rowSnippet = firstRow ? firstRow[0].slice(0, 800) : 'no row match';
+      return res.json({ songs, debug: hasId ? `parse falhou rowCount=${rowCount}` : 'nenhum data-songid no HTML', snippet, rowSnippet });
     }
     return res.json({ songs });
   } catch (e: any) {
@@ -91,34 +95,44 @@ async function searchHehoe(query: string): Promise<string> {
 
 function parseSongs(html: string) {
   const songs: { id: string; artist: string; title: string }[] = [];
-  // Robust: split by <tr data-songid> and extract <td> cells — handle " or ' quotes
   const rowRegex = /<tr[^>]*data-songid\s*=\s*["']?(?<id>\d+)["']?[^>]*>([\s\S]*?)<\/tr>/gi;
   let rowMatch: RegExpExecArray | null;
   while ((rowMatch = rowRegex.exec(html)) && songs.length < 30) {
     const id = rowMatch.groups?.id || '';
     const rowHtml = rowMatch[1] || rowMatch[0];
-    // Extract all <td> contents
-    const cells: string[] = [];
-    const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/g;
-    let tdMatch: RegExpExecArray | null;
-    while ((tdMatch = tdRegex.exec(rowHtml))) {
-      cells.push(tdMatch[1] || '');
-    }
-    // usdb_syncer order: 0=sample, 1=cover, 2=artist, 3=title
+    // Strategy 1: <td>artist</td> followed by <td><a>title</a>
     let artist = '';
     let title = '';
-    if (cells.length >= 4) {
-      artist = stripHtml(cells[2] || '');
-      // title cell contains <a>title</a>
-      const titleCell = cells[3] || '';
-      const aMatch = titleCell.match(/<a[^>]*>([\s\S]*?)<\/a>/);
-      title = stripHtml((aMatch ? aMatch[1] : titleCell) || '');
+    const atRegex = /<td[^>]*>\s*([^<]+?)\s*<\/td>\s*<td[^>]*>\s*<a[^>]*>\s*([^<]+?)\s*<\/a>/i;
+    const at = rowHtml.match(atRegex);
+    if (at) {
+      artist = stripHtml(at[1] || '');
+      title = stripHtml(at[2] || '');
+    } else {
+      // Strategy 2: split <td> cells
+      const cells: string[] = [];
+      const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+      let tdMatch: RegExpExecArray | null;
+      while ((tdMatch = tdRegex.exec(rowHtml))) {
+        cells.push(tdMatch[1] || '');
+      }
+      if (cells.length >= 4) {
+        artist = stripHtml(cells[2] || '');
+        const titleCell = cells[3] || '';
+        const aMatch = titleCell.match(/<a[^>]*>([\s\S]*?)<\/a>/i);
+        title = stripHtml((aMatch ? aMatch[1] : titleCell) || '');
+      } else if (cells.length >= 2) {
+        // fallback: last two cells
+        artist = stripHtml(cells[cells.length - 2] || '');
+        const last = cells[cells.length - 1] || '';
+        const aMatch = last.match(/<a[^>]*>([\s\S]*?)<\/a>/i);
+        title = stripHtml((aMatch ? aMatch[1] : last) || '');
+      }
     }
     if (id && artist && title) songs.push({ id, artist: artist.trim(), title: title.trim() });
   }
   if (songs.length) return songs;
-  // fallback to previous regexes
-  const detailed = /<tr class="list_tr\d"\s+data-songid="(?<song_id>\d+)"[^>]*>[\s\S]*?<td[^>]*?>[\s\S]*?<td[^>]*?><img[^>]*>[\s\S]*?<td[^>]*?>(?<artist>[\s\S]*?)<\/td>\s*<td[^>]*?><a[^>]*>(?<title>[\s\S]*?)<\/a>/g;
+  const detailed = /<tr class="list_tr\d"\s+data-songid="(?<song_id>\d+)"[^>]*>[\s\S]*?<td[^>]*?>[\s\S]*?<td[^>]*?><img[^>]*>[\s\S]*?<td[^>]*?>(?<artist>[\s\S]*?)<\/td>\s*<td[^>]*?><a[^>]*>(?<title>[\s\S]*?)<\/a>/gi;
   let m: RegExpExecArray | null;
   while ((m = detailed.exec(html)) && songs.length < 30) {
     const artist = stripHtml(m.groups?.artist || '').trim();
