@@ -91,7 +91,33 @@ async function searchHehoe(query: string): Promise<string> {
 
 function parseSongs(html: string) {
   const songs: { id: string; artist: string; title: string }[] = [];
-  // Regex from usdb_syncer: <tr class="list_tr\d" data-songid="..." data-lastchange="..."><td>...<td><img...><td>artist</td><td><a>title
+  // Robust: split by <tr data-songid> and extract <td> cells
+  const rowRegex = /<tr[^>]*data-songid="(?<id>\d+)"[^>]*>([\s\S]*?)<\/tr>/g;
+  let rowMatch: RegExpExecArray | null;
+  while ((rowMatch = rowRegex.exec(html)) && songs.length < 30) {
+    const id = rowMatch.groups?.id || '';
+    const rowHtml = rowMatch[1] || rowMatch[0];
+    // Extract all <td> contents
+    const cells: string[] = [];
+    const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/g;
+    let tdMatch: RegExpExecArray | null;
+    while ((tdMatch = tdRegex.exec(rowHtml))) {
+      cells.push(tdMatch[1] || '');
+    }
+    // usdb_syncer order: 0=sample, 1=cover, 2=artist, 3=title
+    let artist = '';
+    let title = '';
+    if (cells.length >= 4) {
+      artist = stripHtml(cells[2] || '');
+      // title cell contains <a>title</a>
+      const titleCell = cells[3] || '';
+      const aMatch = titleCell.match(/<a[^>]*>([\s\S]*?)<\/a>/);
+      title = stripHtml((aMatch ? aMatch[1] : titleCell) || '');
+    }
+    if (id && artist && title) songs.push({ id, artist: artist.trim(), title: title.trim() });
+  }
+  if (songs.length) return songs;
+  // fallback to previous regexes
   const detailed = /<tr class="list_tr\d"\s+data-songid="(?<song_id>\d+)"[^>]*>[\s\S]*?<td[^>]*?>[\s\S]*?<td[^>]*?><img[^>]*>[\s\S]*?<td[^>]*?>(?<artist>[\s\S]*?)<\/td>\s*<td[^>]*?><a[^>]*>(?<title>[\s\S]*?)<\/a>/g;
   let m: RegExpExecArray | null;
   while ((m = detailed.exec(html)) && songs.length < 30) {
