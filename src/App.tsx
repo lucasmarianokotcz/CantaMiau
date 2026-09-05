@@ -58,6 +58,12 @@ export default function App() {
   const [scores, setScores] = useState<GameScores | null>(null);
   const [run, setRun] = useState(0);
   const [query, setQuery] = useState("");
+  const [usdbQuery, setUsdbQuery] = useState("");
+  const [usdbResults, setUsdbResults] = useState<{ id: string; artist: string; title: string }[]>([]);
+  const [usdbLoading, setUsdbLoading] = useState(false);
+  const [usdbError, setUsdbError] = useState("");
+  const [importingId, setImportingId] = useState<string | null>(null);
+  const [importMsg, setImportMsg] = useState("");
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [screen]);
@@ -91,6 +97,32 @@ export default function App() {
     void refreshCatalog();
     return () => { catalogRequest.current++; };
   }, [refreshCatalog]);
+  const searchUsdb = async () => {
+    const q = usdbQuery.trim();
+    if (q.length < 2) { setUsdbError("Digite pelo menos 2 letras."); return; }
+    setUsdbLoading(true); setUsdbError(""); setUsdbResults([]); setImportMsg("");
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro na busca');
+      setUsdbResults(data.songs || []);
+      if (!data.songs?.length) setUsdbError("Nenhuma música encontrada. Tente artista + título.");
+    } catch (e: any) {
+      setUsdbError(String(e.message || e));
+    } finally { setUsdbLoading(false); }
+  };
+  const importUsdb = async (id: string) => {
+    setImportingId(id); setImportMsg(""); setUsdbError("");
+    try {
+      const res = await fetch('/api/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Falha ao importar');
+      setImportMsg(`✓ ${data.artist} - ${data.title} adicionada! ${data.audioUploaded ? 'Áudio baixado.' : 'Sem áudio — verifique #VIDEO no TXT.'}`);
+      await refreshCatalog();
+    } catch (e: any) {
+      setUsdbError(String(e.message || e));
+    } finally { setImportingId(null); }
+  };
   const start = () => {
     setPlayers((p) => ({
       player1: p.player1.trim() || "Jogador 1",
@@ -196,8 +228,36 @@ export default function App() {
                 .toLocaleLowerCase()
                 .includes(query.toLocaleLowerCase()),
             ) && <p className="muted">Nenhuma música encontrada.</p>}
+          <details className="add-songs" open>
+            <summary>♫ Buscar no USDB — adicionar direto</summary>
+            <p>Busque no USDB (usdb.animux.de) e adicione em 1 clique. Precisa de <code>USDB_USER/PASS</code> e <code>BLOB_READ_WRITE_TOKEN</code> na Vercel. O áudio vem do YouTube (#VIDEO) via m4a.</p>
+            <div className="usdb-search">
+              <div className="search">
+                <span>⌕</span>
+                <input aria-label="Buscar no USDB" placeholder="Ex: Linkin Park Numb" value={usdbQuery} onChange={e => setUsdbQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && searchUsdb()} />
+                <button className="secondary compact" disabled={usdbLoading} onClick={searchUsdb}>{usdbLoading ? 'Buscando…' : 'Buscar'}</button>
+              </div>
+              {usdbError && <p className="error" role="alert">{usdbError}</p>}
+              {importMsg && <p className="muted" style={{color:'#b9f68a'}}>{importMsg}</p>}
+              {usdbResults.length > 0 && (
+                <div className="song-list" style={{marginTop:12, maxHeight:260}}>
+                  {usdbResults.map(r => (
+                    <div key={r.id} className="song-item" style={{cursor:'default'}}>
+                      <span className="song-info" style={{flex:1}}>
+                        <strong>{r.title}</strong><span>{r.artist}</span>
+                      </span>
+                      <span className="song-length">#{r.id}</span>
+                      <button className="secondary compact" disabled={importingId===r.id} onClick={() => importUsdb(r.id)}>
+                        {importingId===r.id ? 'Adicionando…' : '+ Adicionar'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </details>
           <details className="add-songs">
-            <summary>+ Adicionar suas músicas</summary>
+            <summary>+ Adicionar manualmente</summary>
             <p>
               Coloque a pasta da música em <code>public/songs</code>, com o TXT
               UltraStar e o áudio indicado nele. O TXT pode ter o nome original
