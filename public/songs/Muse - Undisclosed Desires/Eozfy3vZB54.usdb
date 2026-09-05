@@ -1,0 +1,44 @@
+{
+    "song_id": 8148,
+    "usdb_mtime": 1446200554,
+    "meta_tags": "v=R8OOWcsFj0U,co=undisclosed-desires-554f50fb6917d.jpg,bg=muse-5b8c357e3d31b.jpg",
+    "pinned": false,
+    "txt": {
+        "fname": "Muse - Undisclosed Desires.txt",
+        "mtime": 1788643622452827,
+        "resource": "https://usdb.animux.de/?link=gettxt&id=8148",
+        "status": "success"
+    },
+    "audio": {
+        "fname": "Muse - Undisclosed Desires.m4a",
+        "mtime": 1788643622459826,
+        "resource": "R8OOWcsFj0U",
+        "status": "success"
+    },
+    "vocals": {
+        "status": "skipped_disabled"
+    },
+    "instrumental": {
+        "status": "skipped_disabled"
+    },
+    "video": {
+        "fname": "Muse - Undisclosed Desires.mp4",
+        "mtime": 1788643619395748,
+        "resource": "R8OOWcsFj0U",
+        "status": "success"
+    },
+    "cover": {
+        "fname": "Muse - Undisclosed Desires [CO].jpg",
+        "mtime": 1788643621002820,
+        "resource": "https://assets.fanart.tv/fanart/undisclosed-desires-554f50fb6917d.jpg",
+        "status": "success"
+    },
+    "background": {
+        "fname": "Muse - Undisclosed Desires [BG].jpg",
+        "mtime": 1788643622438825,
+        "resource": "https://assets.fanart.tv/fanart/muse-5b8c357e3d31b.jpg",
+        "status": "success"
+    },
+    "custom_data": {},
+    "version": 1
+}

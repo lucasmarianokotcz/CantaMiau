@@ -1,0 +1,44 @@
+{
+    "song_id": 15469,
+    "usdb_mtime": 1365015715,
+    "meta_tags": "v=ekzHIouo8Q4,co=https://images.genius.com/2e1e1ea46235d86a0ba541a1c30b3397.1000x1000x1.jpg,bg=bruno-mars-4e9eb77a469ae.jpg",
+    "pinned": false,
+    "txt": {
+        "fname": "Bruno Mars - When I Was Your Man.txt",
+        "mtime": 1788644723069972,
+        "resource": "https://usdb.animux.de/?link=gettxt&id=15469",
+        "status": "success"
+    },
+    "audio": {
+        "fname": "Bruno Mars - When I Was Your Man.m4a",
+        "mtime": 1788644723076973,
+        "resource": "ekzHIouo8Q4",
+        "status": "success"
+    },
+    "vocals": {
+        "status": "skipped_disabled"
+    },
+    "instrumental": {
+        "status": "skipped_disabled"
+    },
+    "video": {
+        "fname": "Bruno Mars - When I Was Your Man.mp4",
+        "mtime": 1788644721519797,
+        "resource": "ekzHIouo8Q4",
+        "status": "success"
+    },
+    "cover": {
+        "fname": "Bruno Mars - When I Was Your Man [CO].jpg",
+        "mtime": 1788644721678976,
+        "resource": "https://images.genius.com/2e1e1ea46235d86a0ba541a1c30b3397.1000x1000x1.jpg",
+        "status": "success"
+    },
+    "background": {
+        "fname": "Bruno Mars - When I Was Your Man [BG].jpg",
+        "mtime": 1788644723057471,
+        "resource": "https://assets.fanart.tv/fanart/bruno-mars-4e9eb77a469ae.jpg",
+        "status": "success"
+    },
+    "custom_data": {},
+    "version": 1
+}

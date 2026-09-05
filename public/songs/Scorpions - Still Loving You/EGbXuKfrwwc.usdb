@@ -1,0 +1,44 @@
+{
+    "song_id": 2659,
+    "usdb_mtime": 1770833332,
+    "meta_tags": "v=syq5mNm42zk,co=still-loving-you-5e1df82366a68.jpg,bg=scorpions-629b757e0fe6c.jpg",
+    "pinned": false,
+    "txt": {
+        "fname": "Scorpions - Still Loving You.txt",
+        "mtime": 1788646350630156,
+        "resource": "https://usdb.animux.de/?link=gettxt&id=2659",
+        "status": "success"
+    },
+    "audio": {
+        "fname": "Scorpions - Still Loving You.m4a",
+        "mtime": 1788646350637659,
+        "resource": "syq5mNm42zk",
+        "status": "success"
+    },
+    "vocals": {
+        "status": "skipped_disabled"
+    },
+    "instrumental": {
+        "status": "skipped_disabled"
+    },
+    "video": {
+        "fname": "Scorpions - Still Loving You.mp4",
+        "mtime": 1788646347529249,
+        "resource": "syq5mNm42zk",
+        "status": "success"
+    },
+    "cover": {
+        "fname": "Scorpions - Still Loving You [CO].jpg",
+        "mtime": 1788646349096280,
+        "resource": "https://assets.fanart.tv/fanart/still-loving-you-5e1df82366a68.jpg",
+        "status": "success"
+    },
+    "background": {
+        "fname": "Scorpions - Still Loving You [BG].jpg",
+        "mtime": 1788646350615643,
+        "resource": "https://assets.fanart.tv/fanart/scorpions-629b757e0fe6c.jpg",
+        "status": "success"
+    },
+    "custom_data": {},
+    "version": 1
+}

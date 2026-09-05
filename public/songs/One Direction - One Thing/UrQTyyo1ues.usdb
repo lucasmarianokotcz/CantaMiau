@@ -1,0 +1,41 @@
+{
+    "song_id": 13733,
+    "usdb_mtime": 1333383888,
+    "meta_tags": "a=6VF5DI6rDos,co=https://images.rapgenius.com/fc78445338e521cced231228a9eee4d5.1000x1000x1.jpg,bg=one-direction-536c78978b054.jpg",
+    "pinned": false,
+    "txt": {
+        "fname": "One Direction - One Thing.txt",
+        "mtime": 1788642625463910,
+        "resource": "https://usdb.animux.de/?link=gettxt&id=13733",
+        "status": "success"
+    },
+    "audio": {
+        "fname": "One Direction - One Thing.m4a",
+        "mtime": 1788642625470953,
+        "resource": "6VF5DI6rDos",
+        "status": "success"
+    },
+    "vocals": {
+        "status": "skipped_disabled"
+    },
+    "instrumental": {
+        "status": "skipped_disabled"
+    },
+    "video": {
+        "status": "skipped_unavailable"
+    },
+    "cover": {
+        "fname": "One Direction - One Thing [CO].jpg",
+        "mtime": 1788642623930431,
+        "resource": "https://images.rapgenius.com/fc78445338e521cced231228a9eee4d5.1000x1000x1.jpg",
+        "status": "success"
+    },
+    "background": {
+        "fname": "One Direction - One Thing [BG].jpg",
+        "mtime": 1788642625449264,
+        "resource": "https://assets.fanart.tv/fanart/one-direction-536c78978b054.jpg",
+        "status": "success"
+    },
+    "custom_data": {},
+    "version": 1
+}

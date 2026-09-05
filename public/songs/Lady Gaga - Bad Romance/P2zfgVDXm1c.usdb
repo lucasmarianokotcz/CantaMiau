@@ -1,0 +1,44 @@
+{
+    "song_id": 11052,
+    "usdb_mtime": 1292335610,
+    "meta_tags": "v=qrO4YZeyl0I,co=bad-romance-5373ae2de491c.jpg,bg=lady-gaga-4ddece14a984b.jpg,medley=1046-1871",
+    "pinned": false,
+    "txt": {
+        "fname": "Lady Gaga - Bad Romance.txt",
+        "mtime": 1788639843927747,
+        "resource": "https://usdb.animux.de/?link=gettxt&id=11052",
+        "status": "success"
+    },
+    "audio": {
+        "fname": "Lady Gaga - Bad Romance.m4a",
+        "mtime": 1788639843938246,
+        "resource": "qrO4YZeyl0I",
+        "status": "success"
+    },
+    "vocals": {
+        "status": "skipped_disabled"
+    },
+    "instrumental": {
+        "status": "skipped_disabled"
+    },
+    "video": {
+        "fname": "Lady Gaga - Bad Romance.mp4",
+        "mtime": 1788639840901525,
+        "resource": "qrO4YZeyl0I",
+        "status": "success"
+    },
+    "cover": {
+        "fname": "Lady Gaga - Bad Romance [CO].jpg",
+        "mtime": 1788639842693923,
+        "resource": "https://assets.fanart.tv/fanart/bad-romance-5373ae2de491c.jpg",
+        "status": "success"
+    },
+    "background": {
+        "fname": "Lady Gaga - Bad Romance [BG].jpg",
+        "mtime": 1788639843911746,
+        "resource": "https://assets.fanart.tv/fanart/lady-gaga-4ddece14a984b.jpg",
+        "status": "success"
+    },
+    "custom_data": {},
+    "version": 1
+}

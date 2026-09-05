@@ -1,0 +1,44 @@
+{
+    "song_id": 5926,
+    "usdb_mtime": 1235669052,
+    "meta_tags": "v=DqoLMGSBGYc,co=https://m.media-amazon.com/images/I/91ZCQ6RTfJL.jpg,co-crop=0-20-1331-1331,bg=chapman-tracy-5212ae9051d11.jpg",
+    "pinned": false,
+    "txt": {
+        "fname": "Tracy Chapman - Baby Can I Hold You.txt",
+        "mtime": 1788641515200449,
+        "resource": "https://usdb.animux.de/?link=gettxt&id=5926",
+        "status": "success"
+    },
+    "audio": {
+        "fname": "Tracy Chapman - Baby Can I Hold You.m4a",
+        "mtime": 1788641515207950,
+        "resource": "DqoLMGSBGYc",
+        "status": "success"
+    },
+    "vocals": {
+        "status": "skipped_disabled"
+    },
+    "instrumental": {
+        "status": "skipped_disabled"
+    },
+    "video": {
+        "fname": "Tracy Chapman - Baby Can I Hold You.mp4",
+        "mtime": 1788641513469023,
+        "resource": "DqoLMGSBGYc",
+        "status": "success"
+    },
+    "cover": {
+        "fname": "Tracy Chapman - Baby Can I Hold You [CO].jpg",
+        "mtime": 1788641513735192,
+        "resource": "https://m.media-amazon.com/images/I/91ZCQ6RTfJL.jpg",
+        "status": "success"
+    },
+    "background": {
+        "fname": "Tracy Chapman - Baby Can I Hold You [BG].jpg",
+        "mtime": 1788641515186449,
+        "resource": "https://assets.fanart.tv/fanart/chapman-tracy-5212ae9051d11.jpg",
+        "status": "success"
+    },
+    "custom_data": {},
+    "version": 1
+}
