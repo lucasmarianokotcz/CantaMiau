@@ -19,14 +19,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   try {
     const html = await searchWithAuth(q, user, pass);
-    const songs = parseSongs(html).slice(0, 20);
+    const allSongs = parseSongs(html);
+    const qLower = q.toLowerCase();
+    const filtered = allSongs.filter(s => (`${s.artist} ${s.title}`.toLowerCase().includes(qLower))).slice(0, 20);
+    const songs = filtered.length ? filtered : allSongs.slice(0, 20); // fallback to unfiltered if query not found in this batch
     if (!songs.length) {
       const idx = html.indexOf('data-songid');
       const snippet = idx >= 0 ? html.slice(Math.max(0, idx - 500), idx + 2000) : html.slice(0, 3000);
       console.log('USDB search empty, html length', html.length, 'snippet', snippet.slice(0, 2000));
       const hasId = html.includes('data-songid');
       const rowCount = (html.match(/data-songid/g) || []).length;
-      // also try to extract first row cells for debug
       const firstRow = html.match(/<tr[^>]*data-songid[^>]*>[\s\S]*?<\/tr>/i);
       const rowSnippet = firstRow ? firstRow[0].slice(0, 800) : 'no row match';
       return res.json({ songs, debug: hasId ? `parse falhou rowCount=${rowCount}` : 'nenhum data-songid no HTML', snippet, rowSnippet });
@@ -63,23 +65,36 @@ async function searchWithAuth(query: string, user: string, pass: string): Promis
   if (loginText.includes('Login invalid') || loginText.includes('Login ungültig')) {
     throw new Error('USDB login falhou — verifique USDB_USER/PASS na Vercel');
   }
-  // search — USDB list expects GET with wd (word) + order/limit as query params
-  const searchUrl = `${USDB_BASE}/index.php?link=list&wd=${encodeURIComponent(query)}&limit=20&order=views&ud=desc`;
-  const searchRes = await fetch(searchUrl, {
-    method: 'GET',
-    headers: {
-      'User-Agent': 'CantaMiau/1.0',
-      Cookie: cookies,
-    },
-  });
-  const html = await searchRes.text();
-  if (html.includes('You are not logged in') || html.includes('Du bist nicht eingeloggt')) {
-    throw new Error('USDB retornou "não logado" — sessão expirou ou credenciais inválidas');
+  // USDB list with wd doesn't filter reliably — fetch batches and filter locally like usdb_syncer
+  let allHtml = '';
+  for (let start = 0; start < 3000; start += 500) {
+    const params = new URLSearchParams({ order: 'artist', ud: 'asc', limit: '500', details: '1', start: String(start), wd: query });
+    const searchRes = await fetch(`${USDB_BASE}/index.php?link=list`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'CantaMiau/1.0',
+        Cookie: cookies,
+      },
+      body: params.toString(),
+    });
+    const html = await searchRes.text();
+    if (html.includes('You are not logged in') || html.includes('Du bist nicht eingeloggt')) {
+      throw new Error('USDB retornou "não logado" — sessão expirou ou credenciais inválidas');
+    }
+    allHtml += html;
+    const songsInBatch = (html.match(/data-songid/g) || []).length;
+    if (songsInBatch < 500) break;
+    // early exit if we already have enough matches for query
+    const batchSongs = parseSongs(html);
+    const qLower = query.toLowerCase();
+    const matches = batchSongs.filter(s => (`${s.artist} ${s.title}`.toLowerCase().includes(qLower)));
+    if (matches.length >= 20) break;
   }
-  if (!html.includes('data-songid')) {
-    console.log('USDB search html snippet', html.slice(0, 800));
+  if (!allHtml.includes('data-songid')) {
+    console.log('USDB search html snippet', allHtml.slice(0, 800));
   }
-  return html;
+  return allHtml;
 }
 
 async function searchHehoe(query: string): Promise<string> {
