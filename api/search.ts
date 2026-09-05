@@ -20,9 +20,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const html = await searchWithAuth(q, user, pass);
     const allSongs = parseSongs(html);
-    const qLower = q.toLowerCase();
-    const filtered = allSongs.filter(s => (`${s.artist} ${s.title}`.toLowerCase().includes(qLower))).slice(0, 20);
-    const songs = filtered.length ? filtered : allSongs.slice(0, 20); // fallback to unfiltered if query not found in this batch
+    // Dedupe by id (buscamos por artista + título)
+    const seen = new Set<string>();
+    const deduped = allSongs.filter(s => (seen.has(s.id) ? false : (seen.add(s.id), true)));
+    const words = qLowerSplit(q);
+    const scored = deduped.map(s => ({ s, score: matchScore(`${s.artist} ${s.title}`.toLowerCase(), words) }));
+    const filtered = scored.filter(x => x.score > 0).sort((a, b) => b.score - a.score).map(x => x.s).slice(0, 20);
+    const songs = filtered.length ? filtered : [];
+    // debug: quantos vieram no total
+    console.log(`USDB search q=${q} total=${deduped.length} matched=${filtered.length}`);
     if (!songs.length) {
       const idx = html.indexOf('data-songid');
       const snippet = idx >= 0 ? html.slice(Math.max(0, idx - 500), idx + 2000) : html.slice(0, 3000);
@@ -65,11 +71,10 @@ async function searchWithAuth(query: string, user: string, pass: string): Promis
   if (loginText.includes('Login invalid') || loginText.includes('Login ungültig')) {
     throw new Error('USDB login falhou — verifique USDB_USER/PASS na Vercel');
   }
-  // USDB list with wd doesn't filter reliably — fetch batches and filter locally like usdb_syncer
-  let allHtml = '';
-  for (let start = 0; start < 3000; start += 500) {
-    const params = new URLSearchParams({ order: 'artist', ud: 'asc', limit: '500', details: '1', start: String(start), wd: query });
-    const searchRes = await fetch(`${USDB_BASE}/index.php?link=list`, {
+  // MAX_SONGS_PER_PAGE=100 — limit maior retorna vazio. Campos de busca: interpret (artista) e title.
+  const fetchList = async (extra: Record<string, string>) => {
+    const params = new URLSearchParams({ order: 'views', ud: 'desc', limit: '100', details: '1', start: '0', ...extra });
+    const r = await fetch(`${USDB_BASE}/index.php?link=list`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -78,23 +83,22 @@ async function searchWithAuth(query: string, user: string, pass: string): Promis
       },
       body: params.toString(),
     });
-    const html = await searchRes.text();
+    const html = await r.text();
     if (html.includes('You are not logged in') || html.includes('Du bist nicht eingeloggt')) {
       throw new Error('USDB retornou "não logado" — sessão expirou ou credenciais inválidas');
     }
-    allHtml += html;
-    const songsInBatch = (html.match(/data-songid/g) || []).length;
-    if (songsInBatch < 500) break;
-    // early exit if we already have enough matches for query
-    const batchSongs = parseSongs(html);
-    const qLower = query.toLowerCase();
-    const matches = batchSongs.filter(s => (`${s.artist} ${s.title}`.toLowerCase().includes(qLower)));
-    if (matches.length >= 20) break;
+    return html;
+  };
+  // Tenta buscar por artista e por título separadamente (o USDB faz AND se mandar os dois juntos)
+  const [byArtist, byTitle] = await Promise.all([
+    fetchList({ interpret: query }),
+    fetchList({ title: query }),
+  ]);
+  const combined = byArtist + '\n<!--split-->\n' + byTitle;
+  if (!combined.includes('data-songid')) {
+    console.log('USDB search empty, artist snippet', byArtist.slice(0, 500), 'title snippet', byTitle.slice(0, 500));
   }
-  if (!allHtml.includes('data-songid')) {
-    console.log('USDB search html snippet', allHtml.slice(0, 800));
-  }
-  return allHtml;
+  return combined;
 }
 
 async function searchHehoe(query: string): Promise<string> {
@@ -167,6 +171,14 @@ function parseSongs(html: string) {
   return songs;
 }
 
+function qLowerSplit(q: string) {
+  return q.toLowerCase().split(/\s+/).filter(w => w.length >= 2);
+}
+function matchScore(haystack: string, words: string[]) {
+  let score = 0;
+  for (const w of words) if (haystack.includes(w)) score += w.length >= 4 ? 2 : 1;
+  return score;
+}
 function stripHtml(s: string) {
   return s.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#039;/g, "'").trim();
 }
