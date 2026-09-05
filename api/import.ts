@@ -59,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const folderPrefix = `songs/${safeFolder}`;
 
     // Upload TXT as song.txt
-    await put(`${folderPrefix}/song.txt`, txt, { access: 'public', addRandomSuffix: false, contentType: 'text/plain; charset=utf-8' });
+    await put(`${folderPrefix}/song.txt`, txt, { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'text/plain; charset=utf-8' });
 
     // Try to download cover/bg via direct usdb animux file? Use detail page parsing for cover url
     // For simplicity, if COVER is like "Artist - Title [CO].jpg", we can try to fetch it via animux download link
@@ -68,7 +68,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const coverRes = await fetch(`${USDB_BASE}/data/cover/${id}.jpg`, { headers: { Cookie: cookies } });
       if (coverRes.ok) {
         const buf = Buffer.from(await coverRes.arrayBuffer());
-        await put(`${folderPrefix}/${coverFile || 'cover.jpg'}`, buf, { access: 'public', addRandomSuffix: false });
+        await put(`${folderPrefix}/${coverFile || 'cover.jpg'}`, buf, { access: 'public', addRandomSuffix: false, allowOverwrite: true });
       }
     } catch {}
 
@@ -89,11 +89,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             const ext = format.container === 'mp4' ? 'm4a' : (format.container || 'm4a');
             audioFileName = `${artist} - ${title}.${ext}`;
             // sanitize mp3 name to match txt header? Keep original mp3 name but upload with new name
-            await put(`${folderPrefix}/${audioFileName}`, buf, { access: 'public', addRandomSuffix: false, contentType: format.mimeType || 'audio/mp4' });
+            await put(`${folderPrefix}/${audioFileName}`, buf, { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: format.mimeType || 'audio/mp4' });
             audioUploaded = true;
             // rewrite TXT to point to actual audio file name
             const newTxt = txt.replace(/#MP3:.*/i, `#MP3:${audioFileName}`);
-            await put(`${folderPrefix}/song.txt`, newTxt, { access: 'public', addRandomSuffix: false, contentType: 'text/plain; charset=utf-8' });
+            await put(`${folderPrefix}/song.txt`, newTxt, { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'text/plain; charset=utf-8' });
           }
         }
       } catch (e) {
@@ -114,8 +114,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const entry = { folder: safeFolder, songFile: 'song.txt' };
     if (!catalog.find(e => e.folder === safeFolder)) {
       catalog.push(entry);
-      await put('songs/catalog.json', JSON.stringify(catalog, null, 2), { access: 'public', addRandomSuffix: false, contentType: 'application/json' });
     }
+    await put('songs/catalog.json', JSON.stringify(catalog, null, 2), { access: 'public', addRandomSuffix: false, allowOverwrite: true, contentType: 'application/json' });
 
     return res.json({ ok: true, folder: safeFolder, audio: audioFileName, audioUploaded, title, artist });
   } catch (e: any) {
