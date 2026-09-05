@@ -7,6 +7,7 @@ const SONG_ROW_REGEX = /<tr class="list_tr\d"\s+data-songid="(?<song_id>\d+)"[^>
 const ROW_REGEX = /<tr class="list_tr\d"[^>]*data-songid="(?<id>\d+)"[\s\S]*?<td[^>]*?>(?<artist>[^<]+)<\/td>\s*<td[^>]*?><a[^>]*>(?<title>[^<]+)<\/a>/g;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
   const q = (req.query.q as string || '').trim();
   if (!q || q.length < 2) return res.json({ songs: [] });
@@ -20,12 +21,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const html = await searchWithAuth(q, user, pass);
     const songs = parseSongs(html).slice(0, 20);
     if (!songs.length) {
-      console.log('USDB search empty, html snippet', html.slice(0, 2000));
-      // return debug to help user
-      if (html.includes('data-songid')) {
-        return res.json({ songs, debug: 'parse falhou, mas encontrou data-songid' });
-      }
-      return res.json({ songs, debug: 'nenhum data-songid no HTML' });
+      const snippet = html.slice(0, 3000);
+      console.log('USDB search empty, html length', html.length, 'snippet', snippet);
+      const hasId = html.includes('data-songid');
+      const rowCount = (html.match(/data-songid/g) || []).length;
+      return res.json({ songs, debug: hasId ? `parse falhou rowCount=${rowCount}` : 'nenhum data-songid no HTML', snippet: snippet.slice(0, 800) });
     }
     return res.json({ songs });
   } catch (e: any) {
@@ -91,8 +91,8 @@ async function searchHehoe(query: string): Promise<string> {
 
 function parseSongs(html: string) {
   const songs: { id: string; artist: string; title: string }[] = [];
-  // Robust: split by <tr data-songid> and extract <td> cells
-  const rowRegex = /<tr[^>]*data-songid="(?<id>\d+)"[^>]*>([\s\S]*?)<\/tr>/g;
+  // Robust: split by <tr data-songid> and extract <td> cells — handle " or ' quotes
+  const rowRegex = /<tr[^>]*data-songid\s*=\s*["']?(?<id>\d+)["']?[^>]*>([\s\S]*?)<\/tr>/gi;
   let rowMatch: RegExpExecArray | null;
   while ((rowMatch = rowRegex.exec(html)) && songs.length < 30) {
     const id = rowMatch.groups?.id || '';
